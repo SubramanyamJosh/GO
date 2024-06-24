@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"io/ioutil"
 	"encoding/json"
+	"flag"
 )
+
+var dev = flag.Bool("dev", false, "dev mode")
 
 func get_keys(entries map[string]bool)(keys []string){
 for k, _ := range entries{
@@ -17,29 +20,34 @@ for k, _ := range entries{
 } 
 
 func get_words() string{
-resp, err := http.Get("https://random-word-api.herokuapp.com/word?number=5")
-if err != nil {
-	return "elephant"
-}
-defer resp.Body.Close()
-body, err := ioutil.ReadAll(resp.Body)
-
-var words []string
-err = json.Unmarshal(body,&words)
-
-if err != nil {
-	return "elephant"
-}
-
-for _,word := range(words) {
-	if len(word) > 4 && len(word) < 9 {
-		return word
+	if *dev {
+		return "elephant"
 	}
-}
-return words[0]
+	resp, err := http.Get("https://random-word-api.herokuapp.com/word?number=5")
+	if err != nil {
+		return "elephant"
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	var words []string
+	err = json.Unmarshal(body,&words)
+
+	if err != nil {
+		return "elephant"
+	}
+
+	for _,word := range(words) {
+		if len(word) > 4 && len(word) < 9 {
+			return word
+		}
+	}
+	return words[0]
 }
 
 func main() {
+		flag.Parse()
+
 	word := get_words()
 
 	// lookup for entries made by the user.
